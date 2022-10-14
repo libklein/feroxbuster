@@ -94,9 +94,12 @@ impl FileOutHandler {
     async fn start(&mut self, tx_stats: CommandSender) -> Result<()> {
         log::trace!("enter: start_file_handler({:?})", tx_stats);
 
-        let mut file = open_file(&self.config.output)?;
+        // TODO time, path-safe parameters (escape), basename, URL no schema, wordlist basename
+        let path = self.config.output.replace("{URL}", &self.config.target_url)
+            .replace("{WORDLIST}", &self.config.wordlist);
+        let mut file = open_file(&path)?;
 
-        log::info!("Writing scan results to {}", self.config.output);
+        log::info!("Writing scan results to {}", path);
 
         while let Some(command) = self.receiver.recv().await {
             match command {
